@@ -14,15 +14,16 @@ with open(r"/user1/irlab/sagnik/API_KEY","r") as f:
 
 
 
+prompt_count=2
+gold_count=9
+doc_count=10
 
-PATH="lost_in_the_middle/Project/QA/Data/10/nq-open-10_total_documents_gold_at_4.jsonl"
+PATH=f"lost_in_the_middle/Project/QA/Data/{doc_count}/nq-open-{doc_count}_total_documents_gold_at_{gold_count}.jsonl"
 
 
 prompts=[]
-prompt_count=5
 for i in range(prompt_count):
     prompts.append(prompt_qa(PATH,i)[0])
-
 
 def measure_attention_sink(model,prompts,tokenizer,device=torch.device("cuda")):
     
@@ -48,7 +49,7 @@ def measure_attention_sink(model,prompts,tokenizer,device=torch.device("cuda")):
 
 
 
-model_name="mesolitica/llama2-embedding-1b-8k"
+model_name="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4"
 
 model=AutoModelForCausalLM.from_pretrained(model_name,attn_implementation="eager",token=TOKEN_KEY).to(torch.device("cuda"))
 tokenizer=AutoTokenizer.from_pretrained(model_name,token=TOKEN_KEY)
@@ -98,11 +99,11 @@ for l in tqdm(range(prompt_count)):
 
     sum_score_prompt+=across_layer_importance_score
 
-    torch.save((1/(l+1))*sum_score_prompt,"/user1/irlab/sagnik/attention_sink_analysis/Plot/across_layer_importance_score.pt")
+    torch.save((1/(l+1))*sum_score_prompt,f"/user1/irlab/sagnik/attention_sink_analysis/Plot/across_layer_importance_score_prompt_count_{prompt_count}_doc_count_{doc_count}_gold_{gold_count}.pt")
 
 across_prompt_importance_score=(1/prompt_count)*sum_score_prompt
 
-torch.save(across_prompt_importance_score,"/user1/irlab/sagnik/attention_sink_analysis/Plot/across_layer_importance_score.pt")
+torch.save(across_prompt_importance_score,f"/user1/irlab/sagnik/attention_sink_analysis/Plot/across_layer_importance_score_prompt_count_{prompt_count}_doc_count_{doc_count}_gold_{gold_count}.pt")
 
 ### Plot
 
@@ -126,7 +127,4 @@ plt.title("Attention Score")
 
 plt.grid(True)
 
-plt.savefig("/user1/irlab/sagnik/attention_sink_analysis/Plot/attention_score_prompt.png", dpi=300, bbox_inches="tight")
-
-
-print(across_prompt_importance_score)
+plt.savefig(f"/user1/irlab/sagnik/attention_sink_analysis/Plot/attention_score_prompt_count_{prompt_count}_doc_count_{doc_count}_gold_{gold_count}.png", dpi=300, bbox_inches="tight")
